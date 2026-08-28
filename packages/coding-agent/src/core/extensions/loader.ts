@@ -500,11 +500,13 @@ async function loadExtensionModule(extensionPath: string, cacheToken?: Extension
 		// Compiled binaries and the bundled Node distribution use embedded modules.
 		// Source TypeScript reuses host modules and root tsconfig paths. Unbundled
 		// Node builds use dist aliases.
-		...(isBunBinary || isNodeSeaBinary || isBundledNode
+		...(isBunBinary || isNodeSeaBinary
 			? { virtualModules: VIRTUAL_MODULES, tryNative: false }
-			: isTypeScriptSourceRuntime
-				? { virtualModules: VIRTUAL_MODULES, tsconfigPaths: true }
-				: { alias: getAliases() }),
+			: isBundledNode
+				? { alias: getAliases(), virtualModules: VIRTUAL_MODULES, tryNative: false }
+				: isTypeScriptSourceRuntime
+					? { virtualModules: VIRTUAL_MODULES, tsconfigPaths: true }
+					: { alias: getAliases() }),
 	});
 
 	const module = await jiti.import(extensionPath, { default: true });
